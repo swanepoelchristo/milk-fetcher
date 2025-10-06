@@ -1,16 +1,8 @@
 "use client";
 
 import {
-  addMonths,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameMonth,
-  isToday,
-  startOfMonth,
-  startOfWeek,
-  subMonths,
+  addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format,
+  isSameMonth, isToday, startOfMonth, startOfWeek, subMonths
 } from "date-fns";
 import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -34,7 +26,7 @@ const demoBatches: Record<string, Batch[]> = {
   ],
 };
 
-// --- KPI demo values shown at top of the day drawer ---
+// === KPI demo values shown at top of the day drawer ===
 type DayKpi = { indicatorId: string; value: number };
 const dayKpis: Record<string, DayKpi[]> = {
   "2025-10-03": [

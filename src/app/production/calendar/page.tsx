@@ -8,6 +8,8 @@ import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import RangeBadge from "@/components/RangeBadge";
+import { indicatorsById, levelForValue } from "@/lib/indicators";
 
 type Batch = {
   id: string;
@@ -21,6 +23,15 @@ const demoBatches: Record<string, Batch[]> = {
   "2025-10-03": [
     { id: "b1", code: "SM240903-01", line: "Feta-G1", product: "Feta", status: "Awaiting QA" },
     { id: "b2", code: "MOZ-20251003-01", line: "Mozz-02", product: "Mozzarella", status: "In Progress" },
+  ],
+};
+
+// KPI demo values shown at top of the day drawer
+type DayKpi = { indicatorId: string; value: number };
+const dayKpis: Record<string, DayKpi[]> = {
+  "2025-10-03": [
+    { indicatorId: "htst_outlet_temp", value: 72.1 },
+    { indicatorId: "feta_cut_ph", value: 6.35 },
   ],
 };
 
@@ -40,7 +51,7 @@ export default function CalendarPage() {
   const onDayClick = (d: Date) => {
     const key = format(d, "yyyy-MM-dd");
     setSelectedDate(key);
-    setSelectedBatch((demoBatches[key] ?? [])[0] ?? null); // preselect first
+    setSelectedBatch((demoBatches[key] ?? [])[0] ?? null); // preselect first batch
     setOpen(true);
   };
 
@@ -81,9 +92,7 @@ export default function CalendarPage() {
                       {b.code} • {b.line}
                     </div>
                   ))}
-                  {(demoBatches[key]!.length ?? 0) > 3 && (
-                    <div className="text-[11px] text-gray-500">+ more…</div>
-                  )}
+                  {(demoBatches[key]!.length ?? 0) > 3 && <div className="text-[11px] text-gray-500">+ more…</div>}
                 </div>
               )}
             </button>
@@ -92,11 +101,31 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>{/* controlled */}</SheetTrigger>
+        <SheetTrigger asChild>{/* controlled by state */}</SheetTrigger>
         <SheetContent side="right" className="w-[900px] sm:w-[90vw]">
           <SheetHeader><SheetTitle>Day view • {selectedDate ?? ""}</SheetTitle></SheetHeader>
 
-          <div className="mt-4 grid grid-cols-12 gap-4">
+          {/* KPI chips */}
+          {selectedDate && (dayKpis[selectedDate]?.length ?? 0) > 0 && (
+            <div className="mt-3 mb-3 flex flex-wrap gap-2">
+              {dayKpis[selectedDate]!.map((k) => {
+                const ind = indicatorsById[k.indicatorId];
+                if (!ind) return null;
+                const lvl = levelForValue(ind, k.value);
+                return (
+                  <div key={ind.id} className="rounded-md border bg-white px-3 py-2 text-xs">
+                    <div className="font-medium">{ind.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span>{k.value} {ind.unit ?? ""}</span>
+                      <RangeBadge level={lvl}>{lvl}</RangeBadge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="grid grid-cols-12 gap-4">
             {/* Left: batches */}
             <div className="col-span-5 border rounded-md bg-white">
               <div className="px-3 py-2 border-b font-medium">Batches</div>
