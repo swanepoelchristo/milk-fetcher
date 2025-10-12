@@ -17,11 +17,13 @@ export default function MoveForm({ name }: { name: string }) {
       body: JSON.stringify({ name, category, subfolder: sub.trim() })
     });
     const j = await res.json().catch(() => null);
+
     if (!res.ok) {
       alert(j?.error ?? 'Move failed');
       return;
     }
-    // Refresh the table so the moved file disappears from Inbox
+
+    // refresh the server component so the row disappears
     startTransition(() => router.refresh());
   }
 
